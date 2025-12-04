@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoLab 3D</title>
+    
+    <!-- IMPORTAÇÃO DE BIBLIOTECAS -->
+    <!-- Tailwind CSS (Estilização) -->
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <!-- Lucide Icons (Ícones) -->
+    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+    
+    <!-- Link para o CSS separado -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col h-screen bg-gray-50 text-slate-800">
+
+    <!-- 1. CABEÇALHO (HEADER) -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shadow-sm z-10 shrink-0">
+        <div class="flex items-center gap-2 text-indigo-600">
+            <i data-lucide="box" class="w-8 h-8"></i>
+            <h1 class="text-xl font-bold tracking-tight">GeoLab 3D</h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <!-- Alternador de Abas -->
+            <div class="flex bg-gray-100 p-1 rounded-lg">
+                <button id="btn-tab-polyhedra" onclick="app.setTab('polyhedra')" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all bg-white shadow-sm text-indigo-600">Poliedros</button>
+                <button id="btn-tab-round" onclick="app.setTab('round')" class="px-4 py-1.5 rounded-md text-sm font-medium transition-all text-gray-500 hover:text-gray-700">Corpos Redondos</button>
+            </div>
+
+            <!-- Botão de Conceitos -->
+            <button onclick="app.toggleModal(true)" class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-full flex items-center gap-1 font-medium text-sm transition-colors" title="Conceitos Básicos">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+                <span class="hidden md:inline">Conceitos</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        
+        <!-- 2. MODAL DE INFORMAÇÕES -->
+        <div id="info-modal" class="hidden-custom absolute inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+            <div class="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative animate-zoom-in">
+                <div class="sticky top-0 bg-white border-b border-gray-100 p-4 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="book-open" class="w-6 h-6 text-indigo-600"></i>
+                        Fundamentos da Geometria Espacial
+                    </h2>
+                    <button onclick="app.toggleModal(false)" class="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-indigo-700">
+                            <div class="p-2 bg-indigo-100 rounded-lg"><i data-lucide="box" class="w-6 h-6"></i></div>
+                            <h3 class="text-lg font-bold">Poliedros</h3>
+                        </div>
+                        <div class="prose text-sm text-gray-600 leading-relaxed">
+                            <p>São sólidos geométricos formados exclusivamente por <strong>superfícies planas</strong> (polígonos), chamadas de faces.</p>
+                            <ul class="list-disc pl-5 space-y-1 marker:text-indigo-400">
+                                <li><strong>Origem:</strong> Do grego <em>poly</em> (muitas) + <em>edro</em> (faces).</li>
+                                <li><strong>Estrutura:</strong> Possuem Vértices, Arestas e Faces bem definidos.</li>
+                                <li><strong>Característica:</strong> Não possuem curvas e não rolam facilmente.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3 text-amber-600">
+                            <div class="p-2 bg-amber-100 rounded-lg"><i data-lucide="cylinder" class="w-6 h-6"></i></div>
+                            <h3 class="text-lg font-bold">Corpos Redondos</h3>
+                        </div>
+                        <div class="prose text-sm text-gray-600 leading-relaxed">
+                            <p>São sólidos que possuem pelo menos uma <strong>superfície curva</strong> em sua estrutura.</p>
+                            <ul class="list-disc pl-5 space-y-1 marker:text-amber-400">
+                                <li><strong>Origem:</strong> Geralmente formados pela rotação de uma figura plana.</li>
+                                <li><strong>Estrutura:</strong> Podem não ter vértices ou arestas retas.</li>
+                                <li><strong>Característica:</strong> Podem rolar se colocados em planos inclinados.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. BARRA LATERAL ESQUERDA -->
+        <aside class="w-full md:w-20 bg-white border-r border-gray-200 flex md:flex-col items-center gap-4 py-4 px-2 overflow-x-auto md:overflow-visible shrink-0 z-10 scrollbar-hide">
+            
+            <!-- Grupo Poliedros -->
+            <div id="group-polyhedra" class="flex md:flex-col gap-4 w-full items-center">
+                <button onclick="app.setShape('cube')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-indigo-600 text-white shadow-md scale-105" data-shape="cube" title="Cubo">
+                    <i data-lucide="box" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Cubo</span>
+                </button>
+                <button onclick="app.setShape('prism_tri')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="prism_tri" title="Prisma Triangular">
+                    <i data-lucide="triangle" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Prisma Δ</span>
+                </button>
+                <button onclick="app.setShape('pyramid')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="pyramid" title="Pirâmide">
+                    <i data-lucide="triangle" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Pirâmide</span>
+                </button>
+                <button onclick="app.setShape('octahedron')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="octahedron" title="Octaedro">
+                    <i data-lucide="diamond" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Octaedro</span>
+                </button>
+                <button onclick="app.setShape('dodecahedron')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="dodecahedron" title="Dodecaedro">
+                    <i data-lucide="hexagon" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Dodeca.</span>
+                </button>
+            </div>
+
+            <!-- Grupo Corpos Redondos -->
+            <div id="group-round" class="hidden-custom flex md:flex-col gap-4 w-full items-center">
+                <button onclick="app.setShape('cylinder')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="cylinder" title="Cilindro">
+                    <i data-lucide="cylinder" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Cilindro</span>
+                </button>
+                <button onclick="app.setShape('cone')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="cone" title="Cone">
+                    <i data-lucide="triangle" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Cone</span>
+                </button>
+                <button onclick="app.setShape('sphere')" class="shape-btn flex flex-col items-center justify-center p-2 w-14 h-14 rounded-xl transition-all shrink-0 bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600" data-shape="sphere" title="Esfera">
+                    <i data-lucide="circle" class="w-6 h-6"></i><span class="text-[10px] mt-1 hidden md:block whitespace-nowrap">Esfera</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- 4. ÁREA CENTRAL (Canvas 3D) -->
+        <section class="flex-1 relative bg-gradient-to-br from-gray-100 to-gray-200 cursor-move overflow-hidden" id="canvas-container">
+            
+            <div class="absolute top-4 left-4 flex flex-col gap-2 bg-white/80 backdrop-blur p-2 rounded-lg shadow-sm z-20">
+                <button onclick="app.toggleVisual('vertices')" id="btn-toggle-vertices" class="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold transition-colors w-full bg-gray-100 text-gray-900 ring-1 ring-gray-300">
+                    <div class="w-2 h-2 rounded-full bg-red-500"></div>Vértices
+                </button>
+                <button onclick="app.toggleVisual('edges')" id="btn-toggle-edges" class="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold transition-colors w-full bg-gray-100 text-gray-900 ring-1 ring-gray-300">
+                    <div class="w-2 h-2 rounded-full bg-slate-800"></div>Arestas
+                </button>
+                <button onclick="app.toggleVisual('faces')" id="btn-toggle-faces" class="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold transition-colors w-full bg-gray-100 text-gray-900 ring-1 ring-gray-300">
+                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>Faces
+                </button>
+                <button onclick="app.toggleVisual('aux')" id="btn-toggle-aux" class="flex items-center gap-2 px-3 py-1.5 rounded text-xs font-semibold transition-colors w-full bg-gray-100 text-gray-900 ring-1 ring-gray-300">
+                    <div class="w-2 h-2 rounded-full bg-amber-500"></div>Apótema/Geratriz
+                </button>
+            </div>
+
+            <div class="absolute top-4 right-4 z-20">
+                <button onclick="app.toggleAutoRotate()" class="bg-white/90 backdrop-blur p-2 rounded-full shadow-md text-indigo-600 hover:bg-white hover:scale-105 transition-all">
+                    <div id="icon-play-pause"><i data-lucide="pause" class="w-6 h-6"></i></div>
+                </button>
+            </div>
+            
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-gray-400 text-sm flex items-center gap-2 pointer-events-none select-none">
+                <i data-lucide="rotate-3d" class="w-4 h-4"></i> Arraste para girar
+            </div>
+            
+            <canvas id="geometry-canvas" class="w-full h-full block"></canvas>
+        </section>
+
+        <!-- 5. PAINEL DE INFORMAÇÕES -->
+        <aside class="w-full md:w-96 bg-white border-l border-gray-200 overflow-y-auto shrink-0 z-10">
+            <div class="p-6 space-y-6">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 id="info-title" class="text-2xl font-bold text-gray-900">Cubo</h2>
+                        <span id="info-type-badge" class="px-2 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">Poliedro</span>
+                    </div>
+                    <p id="info-desc" class="text-gray-600 text-sm leading-relaxed">Descrição do sólido aqui.</p>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="text-center p-2 rounded-lg border bg-white border-gray-200 shadow-sm" id="stat-v-box">
+                        <div class="text-xs text-gray-500 mb-1">Vértices (V)</div>
+                        <div id="val-v" class="font-bold text-lg text-gray-900">0</div>
+                    </div>
+                    <div class="text-center p-2 rounded-lg border bg-white border-gray-200 shadow-sm" id="stat-a-box">
+                        <div class="text-xs text-gray-500 mb-1">Arestas (A)</div>
+                        <div id="val-a" class="font-bold text-lg text-gray-900">0</div>
+                    </div>
+                    <div class="text-center p-2 rounded-lg border bg-white border-gray-200 shadow-sm" id="stat-f-box">
+                        <div class="text-xs text-gray-500 mb-1">Faces (F)</div>
+                        <div id="val-f" class="font-bold text-lg text-gray-900">0</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2"><i data-lucide="maximize" class="w-4 h-4"></i>Dimensões</h3>
+                    <div id="dimensions-controls" class="space-y-3">
+                        <!-- Injetado via JS -->
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i>Cálculos</h3>
+                    <div class="bg-slate-900 text-white rounded-xl p-4 space-y-3 shadow-lg">
+                        <div>
+                            <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Volume</div>
+                            <div class="flex items-baseline justify-between">
+                                <code id="formula-vol" class="text-sm opacity-75">V = l³</code>
+                                <span id="calc-vol" class="text-xl font-bold text-emerald-400">0.00</span>
+                            </div>
+                        </div>
+                        <div class="w-full h-px bg-slate-700"></div>
+                        <div>
+                            <div class="text-slate-400 text-xs uppercase tracking-wider mb-1">Área Total</div>
+                            <div class="flex items-baseline justify-between">
+                                <code id="formula-area" class="text-sm opacity-75">A = 6l²</code>
+                                <span id="calc-area" class="text-xl font-bold text-blue-400">0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="legends-container" class="bg-white border border-gray-100 rounded-lg p-3 hidden-custom">
+                        <!-- Injetado via JS -->
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Link para o Script separado -->
+    <script src="script.js"></script>
+</body>
+</html>
+

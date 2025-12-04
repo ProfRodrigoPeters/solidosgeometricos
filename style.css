@@ -1,0 +1,39 @@
+body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden; /* Previne rolagem na página inteira */
+}
+
+/* Ocultar barra de rolagem mas manter funcionalidade */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Classes utilitárias para alternar visibilidade */
+.hidden-custom {
+    display: none !important;
+}
+
+canvas {
+    cursor: move; /* Cursor de movimento para indicar interatividade */
+}
+
+/* Animações do Modal */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes zoomIn {
+    from { transform: scale(0.95); }
+    to { transform: scale(1); }
+}
+.animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+}
+.animate-zoom-in {
+    animation: zoomIn 0.2s ease-out;
+}
+
